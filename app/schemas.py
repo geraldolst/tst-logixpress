@@ -1,5 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, Field
+from typing import Optional
 
 
 class ShipmentStatus(str, Enum):
@@ -10,9 +11,9 @@ class ShipmentStatus(str, Enum):
 
 
 class BaseShipment(BaseModel):
-    content: str
-    weight: float = Field(le=25)
-    destination: int
+    content: str = Field(description="Content description")
+    weight: float = Field(le=25, gt=0, description="Weight must be between 0-25kg")
+    destination: int = Field(description="Destination code")
 
 
 class ShipmentRead(BaseShipment):
@@ -24,7 +25,7 @@ class ShipmentCreate(BaseShipment):
     
 
 class ShipmentUpdate(BaseModel):
-    content: str | None = Field(default=None)
-    weight: float | None = Field(default=None, le=25)
-    destination: int | None = Field(default=None)
-    status: ShipmentStatus
+    content: Optional[str] = Field(default=None)
+    weight: Optional[float] = Field(default=None, le=25, gt=0)
+    destination: Optional[int] = Field(default=None)
+    status: Optional[ShipmentStatus] = Field(default=None)
