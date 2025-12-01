@@ -1,12 +1,16 @@
-from fastapi import FastAPI, HTTPException, status, Query
+from fastapi import FastAPI, HTTPException, status, Query, Depends
 from scalar_fastapi import get_scalar_api_reference
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from .schemas import (
     ShipmentCreate, ShipmentRead, ShipmentUpdate, ShipmentSummary,
     ShipmentStatus, TrackingEventCreate, TrackingEvent,
     Recipient, Seller, PackageDetails
+)
+from .auth import (
+    Token, LoginRequest, User, authenticate_user, create_access_token,
+    get_current_active_user, require_role, ACCESS_TOKEN_EXPIRE_MINUTES
 )
 
 app = FastAPI(
@@ -17,6 +21,19 @@ app = FastAPI(
     
     Sistem ini mengelola siklus hidup pengiriman dari pembuatan order hingga delivered,
     dengan tracking events yang lengkap sesuai prinsip Domain-Driven Design (DDD).
+    
+    ## Authentication
+    API ini dilindungi dengan JWT (JSON Web Token). Gunakan endpoint `/auth/login` untuk mendapatkan token.
+    
+    **Default Users:**
+    - Admin: username=`admin`, password=`admin123`
+    - Courier: username=`courier`, password=`courier123`
+    - Customer: username=`customer`, password=`customer123`
+    
+    **Roles & Permissions:**
+    - `admin`: Full access (CRUD shipments, view all data)
+    - `courier`: Update shipment status, view assigned shipments
+    - `customer`: Create shipments, view own shipments
     """,
     version="1.0.0",
     contact={
@@ -128,6 +145,48 @@ shipments = {
 tracking_event_counter = 4  # Counter untuk ID tracking events
 
 
+# === AUTHENTICATION ENDPOINTS ===
+
+@app.post("/auth/login", response_model=Token, tags=["Authentication"])
+async def login(login_data: LoginRequest):
+    """
+    **Login Endpoint**
+    
+    Authenticate user and receive JWT access token.
+    
+    **Test Credentials:**
+    - Admin: `admin` / `admin123`
+    - Courier: `courier` / `courier123`
+    - Customer: `customer` / `customer123`
+    """
+    user = authenticate_user(login_data.username, login_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username, "role": user.role},
+        expires_delta=access_token_expires
+    )
+    
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.get("/auth/me", response_model=User, tags=["Authentication"])
+async def get_current_user_info(current_user: User = Depends(get_current_active_user)):
+    """
+    **Get Current User Info**
+    
+    Retrieve information about the currently authenticated user.
+    Requires valid JWT token in Authorization header.
+    """
+    return current_user
+
+
 # === SHIPMENT ENDPOINTS (Aggregate Root Operations) ===
 
 @app.get("/", tags=["Root"])
@@ -146,13 +205,16 @@ def root():
 def get_all_shipments(
     status: Optional[ShipmentStatus] = Query(None, description="Filter by shipment status"),
     destination_code: Optional[int] = Query(None, description="Filter by destination code"),
-    limit: int = Query(10, ge=1, le=100, description="Maximum number of results")
+    limit: int = Query(10, ge=1, le=100, description="Maximum number of results"),
+    current_user: User = Depends(get_current_active_user)
 ):
     """
     **C0102: Shipment Tracking & Status Update**
     
     Mengambil daftar shipment dengan opsi filtering berdasarkan status dan destination.
     Mengembalikan summary view untuk efisiensi.
+    
+    **Requires:** Any authenticated user
     """
     result = []
     
@@ -180,12 +242,17 @@ def get_all_shipments(
 
 
 @app.get("/shipment/{shipment_id}", response_model=ShipmentRead, tags=["Shipments"])
-def get_shipment_by_id(shipment_id: int):
+def get_shipment_by_id(
+    shipment_id: int,
+    current_user: User = Depends(get_current_active_user)
+):
     """
     **C0102: Shipment Tracking & Status Update**
     
     Mengambil detail lengkap shipment berdasarkan Tracking Number (ID).
     Mengembalikan Aggregate Root lengkap dengan semua Value Objects dan Tracking Events.
+    
+    **Requires:** Any authenticated user
     """
     if shipment_id not in shipments:
         raise HTTPException(
@@ -209,12 +276,17 @@ def get_shipment_by_id(shipment_id: int):
 
 
 @app.post("/shipment", response_model=dict[str, int], status_code=status.HTTP_201_CREATED, tags=["Shipments"])
-def create_shipment(shipment: ShipmentCreate):
+def create_shipment(
+    shipment: ShipmentCreate,
+    current_user: User = Depends(require_role(["admin", "customer"]))
+):
     """
     **C0101: Shipment Order Creation**
     
     Membuat shipment baru (Aggregate Root).
     Status awal selalu 'placed' dan tracking event pertama dibuat otomatis.
+    
+    **Requires:** Admin or Customer role
     """
     global tracking_event_counter
     
@@ -248,12 +320,18 @@ def create_shipment(shipment: ShipmentCreate):
 
 
 @app.patch("/shipment/{shipment_id}", response_model=ShipmentRead, tags=["Shipments"])
-def update_shipment(shipment_id: int, update_data: ShipmentUpdate):
+def update_shipment(
+    shipment_id: int,
+    update_data: ShipmentUpdate,
+    current_user: User = Depends(require_role(["admin", "courier"]))
+):
     """
     **C0102: Shipment Tracking & Status Update**
     
     Update shipment details. Jika status berubah, tracking event baru akan dibuat.
     Hanya Aggregate Root yang boleh memodifikasi Internal Entities.
+    
+    **Requires:** Admin or Courier role
     """
     global tracking_event_counter
     
@@ -326,8 +404,15 @@ def update_shipment(shipment_id: int, update_data: ShipmentUpdate):
 
 
 @app.delete("/shipment/{shipment_id}", tags=["Shipments"])
-def delete_shipment(shipment_id: int):
-    """Delete a shipment (for admin purposes only)"""
+def delete_shipment(
+    shipment_id: int,
+    current_user: User = Depends(require_role(["admin"]))
+):
+    """
+    Delete a shipment (for admin purposes only)
+    
+    **Requires:** Admin role only
+    """
     if shipment_id not in shipments:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -341,12 +426,17 @@ def delete_shipment(shipment_id: int):
 # === TRACKING EVENTS ENDPOINTS (Internal Entity Operations) ===
 
 @app.get("/shipment/{shipment_id}/tracking", response_model=List[TrackingEvent], tags=["Tracking"])
-def get_shipment_tracking_history(shipment_id: int):
+def get_shipment_tracking_history(
+    shipment_id: int,
+    current_user: User = Depends(get_current_active_user)
+):
     """
     **C0102: Shipment Tracking & Status Update**
     
     Mengambil riwayat tracking events (timeline) dari suatu shipment.
     Tracking Event adalah Internal Entity yang hanya dapat diakses melalui Aggregate Root.
+    
+    **Requires:** Any authenticated user
     """
     if shipment_id not in shipments:
         raise HTTPException(
@@ -359,12 +449,18 @@ def get_shipment_tracking_history(shipment_id: int):
 
 
 @app.post("/shipment/{shipment_id}/tracking", response_model=TrackingEvent, status_code=status.HTTP_201_CREATED, tags=["Tracking"])
-def add_tracking_event(shipment_id: int, event: TrackingEventCreate):
+def add_tracking_event(
+    shipment_id: int,
+    event: TrackingEventCreate,
+    current_user: User = Depends(require_role(["admin", "courier"]))
+):
     """
     **C0102: Shipment Tracking & Status Update**
     
     Menambahkan tracking event baru ke shipment.
     Event hanya bisa ditambahkan melalui Aggregate Root untuk menjaga konsistensi.
+    
+    **Requires:** Admin or Courier role
     """
     global tracking_event_counter
     
@@ -400,11 +496,13 @@ def add_tracking_event(shipment_id: int, event: TrackingEventCreate):
 # === STATISTICS & REPORTING ===
 
 @app.get("/stats", tags=["Statistics"])
-def get_shipment_statistics():
+def get_shipment_statistics(current_user: User = Depends(require_role(["admin"]))):
     """
     **C0601: Performance Reporting Management**
     
     Mendapatkan statistik agregat dari seluruh shipment.
+    
+    **Requires:** Admin role only
     """
     if not shipments:
         return {

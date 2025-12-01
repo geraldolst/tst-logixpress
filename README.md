@@ -27,7 +27,32 @@ Mengelola seluruh siklus hidup pengiriman, mulai dari:
 ### Internal Entity
 - **TrackingEvent**: Riwayat kejadian pengiriman yang hanya dapat diakses melalui Aggregate Root
 
+## Security & Authentication
+
+API ini dilindungi dengan **JWT (JSON Web Token)** authentication untuk memastikan keamanan data dan akses terotorisasi.
+
+### Default Users
+
+| Role | Username | Password | Permissions |
+|------|----------|----------|-------------|
+| Admin | `admin` | `admin123` | Full access (CRUD semua fitur) |
+| Courier | `courier` | `courier123` | Update status, add tracking events |
+| Customer | `customer` | `customer123` | Create shipments, view data |
+
+### Authentication Flow
+
+1. **Login** menggunakan `/auth/login` dengan username dan password
+2. Dapatkan **JWT token** dari response
+3. Gunakan token di header `Authorization: Bearer <token>` untuk setiap request
+4. Token berlaku selama **30 menit**
+
+Lihat [API_TESTING.md](API_TESTING.md) untuk contoh penggunaan lengkap.
+
 ## API Endpoints
+
+### Authentication
+- `POST /auth/login` - Login dan dapatkan JWT token
+- `GET /auth/me` - Get current user info
 
 ### Shipment Management
 - `GET /` - Root endpoint dengan informasi API
@@ -142,6 +167,9 @@ POST /shipment/12701/tracking
 
 - **FastAPI**: Modern web framework untuk Python
 - **Pydantic**: Data validation menggunakan Python type hints
+- **JWT (JSON Web Token)**: Secure authentication & authorization
+- **Passlib + Bcrypt**: Password hashing
+- **Python-JOSE**: JWT token encoding/decoding
 - **Scalar FastAPI**: API documentation
 - **Uvicorn**: ASGI server
 
@@ -152,11 +180,31 @@ tst-logixpress/
 ├── app/
 │   ├── __init__.py
 │   ├── main.py          # FastAPI app & endpoints
-│   └── schemas.py       # Pydantic models (DDD)
+│   ├── schemas.py       # Pydantic models (DDD)
+│   └── auth.py          # JWT authentication & authorization
 ├── requirements.txt
 ├── run.py
-└── README.md
+├── .env.example
+├── README.md
+└── API_TESTING.md       # Authentication testing guide
 ```
+
+## Testing & Dokumentasi
+
+### 1. Swagger UI (Interactive)
+Buka http://127.0.0.1:8000/docs untuk testing interaktif dengan Swagger UI.
+
+**Cara menggunakan authentication di Swagger:**
+1. Klik tombol **Authorize** 
+2. Login untuk mendapatkan token dari `/auth/login`
+3. Masukkan token di field authorization
+4. Test semua endpoints dengan akses terotorisasi
+
+### 2. Scalar Documentation
+Buka http://127.0.0.1:8000/scalar untuk dokumentasi yang lebih modern.
+
+### 3. Manual Testing dengan cURL
+Lihat [API_TESTING.md](API_TESTING.md) untuk contoh lengkap testing dengan cURL dan berbagai role.
 
 ## Author
 

@@ -48,6 +48,9 @@ Thumbs.db
 .env
 .env.local
 .env.development.local
+
+# Testing documentation
+API_TESTING.md
 .env.test.local
 .env.production.local
 
