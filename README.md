@@ -9,28 +9,60 @@
 
 Production-ready FastAPI microservice for last-mile delivery shipment lifecycle management.
 
-## Quick Start
+## 🚀 Cara Menjalankan Aplikasi
 
-### Docker usage
+### Opsi 1: Docker (Recommended)
 ```bash
+# Build dan jalankan container
 docker compose up --build
-```
-- App: http://localhost:8000
-- Docs: http://localhost:8000/docs
-- Scalar: http://localhost:8000/scalar
-- Health: http://localhost:8000/health
 
-### Local development
-```bash
-python -m venv venv
-.\venv\Scripts\Activate.ps1  # Windows PowerShell
-pip install -r requirements.txt
-python run.py
+# Atau jalankan di background
+docker compose up -d
 ```
-Alternative:
+
+**Akses Aplikasi:**
+- 🌐 API: http://localhost:8000
+- 📚 Dokumentasi Scalar: http://localhost:8000/scalar
+- 📖 Swagger UI: http://localhost:8000/docs
+- ❤️ Health Check: http://localhost:8000/health
+
+**Stop container:**
 ```bash
+docker compose down
+```
+
+---
+
+### Opsi 2: Virtual Environment (Local Development)
+
+**Setup (Pertama kali):**
+```bash
+# 1. Buat virtual environment
+python -m venv venv
+
+# 2. Aktifkan venv (PowerShell)
+.\venv\Scripts\Activate.ps1
+
+# 3. Install dependencies
+pip install -r requirements.txt
+```
+
+**Jalankan Aplikasi:**
+```bash
+# Aktifkan venv
+.\venv\Scripts\Activate.ps1
+
+# Jalankan dengan FastAPI dev (auto-reload)
+fastapi dev
+
+# Atau dengan uvicorn
 uvicorn app.main:app --reload --port 8000
 ```
+
+**Akses Aplikasi:**
+- Server berjalan di http://127.0.0.1:8000
+- Tekan **Ctrl + Klik** pada URL di terminal
+- Dokumentasi Scalar: http://127.0.0.1:8000/scalar
 
 ## Project Structure
 ```
