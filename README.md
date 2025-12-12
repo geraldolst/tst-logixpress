@@ -515,7 +515,7 @@ mypy app/                   # Type check
 
 **Prerequisites:**
 1. Create account at [vercel.com](https://vercel.com)
-2. Install Vercel CLI (optional): `npm i -g vercel`
+2. (Optional) Create [Supabase](https://supabase.com) account for persistent database
 
 **Deploy Steps:**
 
@@ -528,7 +528,19 @@ mypy app/                   # Type check
 5. Click "Deploy"
 ```
 
-**Option 2: Via CLI**
+**Option 2: With Supabase Database** 📦
+```
+See detailed guide: SUPABASE_SETUP.md
+
+Quick steps:
+1. Create Supabase project at https://supabase.com
+2. Get database connection string
+3. Deploy to Vercel
+4. Add DATABASE_URL to Vercel environment variables
+5. Redeploy
+```
+
+**Option 3: Via CLI**
 ```bash
 # Install Vercel CLI
 npm i -g vercel
@@ -541,13 +553,13 @@ vercel --prod
 ```
 
 **Environment Variables:**
-Vercel will auto-read from `vercel.json`, but you can override in dashboard:
 ```
-Settings → Environment Variables:
-- SECRET_KEY
-- ALGORITHM
-- ACCESS_TOKEN_EXPIRE_MINUTES
-- ENVIRONMENT
+In Vercel Dashboard → Settings → Environment Variables:
+- SECRET_KEY (required)
+- ALGORITHM (required)
+- ACCESS_TOKEN_EXPIRE_MINUTES (required)
+- ENVIRONMENT (required)
+- DATABASE_URL (optional - for Supabase)
 ```
 
 **Get Your URL:**
@@ -561,10 +573,10 @@ curl https://tst-logixpress.vercel.app/health
 curl https://tst-logixpress.vercel.app/docs
 ```
 
-**⚠️ Vercel Limitations:**
-- Serverless functions (10s timeout on free tier)
-- Stateless (in-memory data resets per request)
-- Best for: API demos, testing, read-heavy operations
+**📦 Database Options:**
+- **In-Memory** (default): No setup needed, data resets per request
+- **Supabase** (recommended): Free PostgreSQL, persistent data
+  - See `SUPABASE_SETUP.md` for detailed guide
 
 **Deployment Features:**
 - ✅ Auto-deploy on push to main branch
@@ -573,6 +585,7 @@ curl https://tst-logixpress.vercel.app/docs
 - ✅ HTTPS by default
 - ✅ Edge network (CDN)
 - ✅ Zero config for most cases
+- ✅ Optional Supabase PostgreSQL integration
 
 **Monitoring:**
 ```bash
