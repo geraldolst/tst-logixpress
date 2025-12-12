@@ -515,68 +515,54 @@ mypy app/                   # Type check
 
 **Prerequisites:**
 1. Create account at [vercel.com](https://vercel.com)
-2. (Optional) Create [Supabase](https://supabase.com) account for persistent database
+2. Connect GitHub account
 
 **Deploy Steps:**
 
-**Option 1: Via Vercel Dashboard (Easiest)**
+**Via Vercel Dashboard:**
 ```
 1. Go to https://vercel.com/new
-2. Import Git Repository
+2. Click "Import Git Repository"
 3. Select: geraldolst/tst-logixpress
 4. Framework Preset: Other
 5. Click "Deploy"
 ```
 
-**Option 2: With Supabase Database** 📦
+**Configuration:**
 ```
-See detailed guide: SUPABASE_SETUP.md
-
-Quick steps:
-1. Create Supabase project at https://supabase.com
-2. Get database connection string
-3. Deploy to Vercel
-4. Add DATABASE_URL to Vercel environment variables
-5. Redeploy
-```
-
-**Option 3: Via CLI**
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Login
-vercel login
-
-# Deploy
-vercel --prod
+Framework Preset: Other
+Root Directory: ./
+Build Command: (leave empty)
+Install Command: pip install -r requirements.txt
+Output Directory: (leave empty)
 ```
 
 **Environment Variables:**
-```
-In Vercel Dashboard → Settings → Environment Variables:
-- SECRET_KEY (required)
-- ALGORITHM (required)
-- ACCESS_TOKEN_EXPIRE_MINUTES (required)
-- ENVIRONMENT (required)
-- DATABASE_URL (optional - for Supabase)
-```
+Environment variables sudah dikonfigurasi di `vercel.json`:
+- ✅ SECRET_KEY
+- ✅ ALGORITHM
+- ✅ ACCESS_TOKEN_EXPIRE_MINUTES
+- ✅ ENVIRONMENT
 
 **Get Your URL:**
 ```
 Vercel provides: https://tst-logixpress.vercel.app
+Or custom: https://tst-logixpress-[username].vercel.app
 ```
 
 **Test Deployment:**
 ```bash
+# Health check
 curl https://tst-logixpress.vercel.app/health
-curl https://tst-logixpress.vercel.app/docs
-```
 
-**📦 Database Options:**
-- **In-Memory** (default): No setup needed, data resets per request
-- **Supabase** (recommended): Free PostgreSQL, persistent data
-  - See `SUPABASE_SETUP.md` for detailed guide
+# API Documentation
+https://tst-logixpress.vercel.app/docs
+
+# Test login
+curl -X POST https://tst-logixpress.vercel.app/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+```
 
 **Deployment Features:**
 - ✅ Auto-deploy on push to main branch
@@ -584,8 +570,13 @@ curl https://tst-logixpress.vercel.app/docs
 - ✅ Custom domains available
 - ✅ HTTPS by default
 - ✅ Edge network (CDN)
-- ✅ Zero config for most cases
-- ✅ Optional Supabase PostgreSQL integration
+- ✅ Zero configuration
+- ✅ In-memory database (perfect for demo)
+
+**Note:**
+- Uses in-memory database (data resets per deployment)
+- Perfect for demo, testing, and API documentation
+- For persistent data, consider adding external database
 
 **Monitoring:**
 ```bash
@@ -594,6 +585,9 @@ curl https://tst-logixpress.vercel.app/health
 
 # View API docs
 https://tst-logixpress.vercel.app/docs
+
+# View logs
+Vercel Dashboard → Deployments → Logs
 ```
 
 ### Railway Deployment 🚂
