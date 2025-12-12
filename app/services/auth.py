@@ -70,7 +70,10 @@ class AuthService:
             UserInDB if found, None otherwise
         """
         if username in fake_users_db:
-            user_dict = fake_users_db[username]
+            user_dict = fake_users_db[username].copy()
+            # Convert plain_password to hashed_password if needed (for testing compatibility)
+            if "plain_password" in user_dict:
+                user_dict["hashed_password"] = get_password_hash(user_dict.pop("plain_password"))
             return UserInDB(**user_dict)
         return None
     

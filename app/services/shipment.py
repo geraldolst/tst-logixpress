@@ -199,13 +199,22 @@ class ShipmentService:
         
         # Update fields
         if "package_details" in update_dict:
-            shipment["package_details"].update(update_dict["package_details"].model_dump())
+            if isinstance(update_dict["package_details"], dict):
+                shipment["package_details"].update(update_dict["package_details"])
+            else:
+                shipment["package_details"].update(update_dict["package_details"].model_dump())
         if "recipient" in update_dict:
-            shipment["recipient"].update(update_dict["recipient"].model_dump())
+            if isinstance(update_dict["recipient"], dict):
+                shipment["recipient"].update(update_dict["recipient"])
+            else:
+                shipment["recipient"].update(update_dict["recipient"].model_dump())
         if "destination_code" in update_dict:
             shipment["destination_code"] = update_dict["destination_code"]
         if "current_status" in update_dict:
-            shipment["current_status"] = update_dict["current_status"].value
+            if isinstance(update_dict["current_status"], str):
+                shipment["current_status"] = update_dict["current_status"]
+            else:
+                shipment["current_status"] = update_dict["current_status"].value
         
         shipment["updated_at"] = datetime.now()
         

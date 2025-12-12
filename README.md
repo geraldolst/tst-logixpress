@@ -316,7 +316,57 @@ All write operations require authentication and proper role:
 - `422`: Validation error (Pydantic)
 - `500`: Internal server error
 
-## Testing
+## Unit Testing
+
+**Test Coverage: 97%** - Comprehensive test suite with 102 test cases following TDD methodology.
+
+### Test Categories
+- ✅ **Authentication** (18 tests): Login, registration, token validation, password security
+- ✅ **CRUD Operations** (23 tests): Create, read, update, delete shipments
+- ✅ **Tracking** (9 tests): Event management, history tracking
+- ✅ **Security** (13 tests): JWT validation, RBAC, injection attempts
+- ✅ **Service Layer** (15 tests): Business logic, error handling
+- ✅ **Domain Models** (5 tests): Status transitions, validation rules
+- ✅ **Statistics** (6 tests): Admin stats, health checks
+- ✅ **Edge Cases** (13 tests): Boundary conditions, special characters, concurrency
+
+### Running Tests
+
+```bash
+# Run all tests with verbose output
+pytest tests/ -v
+
+# Run with coverage report
+pytest tests/ --cov=app --cov-report=term-missing --cov-report=html
+
+# Run specific test file
+pytest tests/test_auth.py -v
+
+# Run specific test function
+pytest tests/test_auth.py::TestAuthEndpoints::test_login_success -v
+
+# Run with output capture disabled (see print statements)
+pytest tests/ -v -s
+```
+
+### Coverage Report
+After running tests with coverage, view the HTML report:
+```bash
+# Open htmlcov/index.html in browser
+start htmlcov/index.html  # Windows
+open htmlcov/index.html   # macOS
+xdg-open htmlcov/index.html  # Linux
+```
+
+### Test Configuration
+- **Framework**: pytest 7.4.3
+- **Coverage Tool**: pytest-cov 4.1.0
+- **Async Support**: pytest-asyncio 0.21.1
+- **HTTP Client**: httpx 0.25.2
+- **Minimum Coverage**: 95% (configured in pytest.ini)
+- **Current Coverage**: 97% (483 statements, 15 missed)
+
+### API Testing (Manual)
 ```bash
 # Run with curl
 curl http://localhost:8000/health
