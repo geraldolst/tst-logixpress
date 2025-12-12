@@ -121,20 +121,18 @@ jobs:
   summary:
     name: CI Summary
     runs-on: ubuntu-latest
-    needs: [lint, test, docker, docker-compose, integration]
+    needs: [test, docker-build, docker-compose, integration]
     if: always()
     steps:
       - name: Check results
         run: |
-          echo "✅ Linting: ${{ needs.lint.result }}"
           echo "✅ Testing: ${{ needs.test.result }}"
-          echo "✅ Docker Build: ${{ needs.docker.result }}"
+          echo "✅ Docker Build: ${{ needs.docker-build.result }}"
           echo "✅ Docker Compose: ${{ needs.docker-compose.result }}"
           echo "✅ Integration: ${{ needs.integration.result }}"
           
-          if [ "${{ needs.lint.result }}" != "success" ] || \
-             [ "${{ needs.test.result }}" != "success" ] || \
-             [ "${{ needs.docker.result }}" != "success" ] || \
+          if [ "${{ needs.test.result }}" != "success" ] || \
+             [ "${{ needs.docker-build.result }}" != "success" ] || \
              [ "${{ needs.docker-compose.result }}" != "success" ] || \
              [ "${{ needs.integration.result }}" != "success" ]; then
             echo "❌ CI Pipeline failed"
