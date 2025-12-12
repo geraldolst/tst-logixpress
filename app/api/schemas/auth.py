@@ -4,18 +4,21 @@ Authentication Schemas
 Request and response models for authentication endpoints.
 """
 
-from pydantic import BaseModel, EmailStr
 from typing import Optional
+
+from pydantic import BaseModel, EmailStr
 
 
 class LoginRequest(BaseModel):
     """Login request schema"""
+
     username: str
     password: str
 
 
 class RegisterRequest(BaseModel):
     """User registration request schema"""
+
     username: str
     email: EmailStr
     password: str
@@ -24,6 +27,7 @@ class RegisterRequest(BaseModel):
 
 class RegisterResponse(BaseModel):
     """User registration response schema"""
+
     username: str
     email: str
     role: str
@@ -32,6 +36,7 @@ class RegisterResponse(BaseModel):
 
 class User(BaseModel):
     """User model for responses"""
+
     username: str
     email: str
     role: str
@@ -40,4 +45,5 @@ class User(BaseModel):
 
 class UserInDB(User):
     """User model with password hash (internal use)"""
+
     hashed_password: str

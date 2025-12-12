@@ -1,4 +1,12 @@
 # LOGIXPress API
+
+[![CI Pipeline](https://github.com/geraldolst/tst-logixpress/actions/workflows/ci.yml/badge.svg)](https://github.com/geraldolst/tst-logixpress/actions/workflows/ci.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-009688.svg)](https://fastapi.tiangolo.com)
+[![Code Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen.svg)](htmlcov/index.html)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Production-ready FastAPI microservice for last-mile delivery shipment lifecycle management.
 
 ## Quick Start
@@ -380,6 +388,71 @@ curl -X POST "http://localhost:8000/auth/login" \
 curl -H "Authorization: Bearer <your-token>" \
   http://localhost:8000/shipments
 ```
+
+## CI/CD Pipeline
+
+### Automated Workflows
+The project uses GitHub Actions for continuous integration and deployment:
+
+#### 1. **CI Pipeline** (`.github/workflows/ci.yml`)
+Triggered on push/PR to `main` and `develop` branches.
+
+**Jobs:**
+- 🧹 **Linting**: Code quality checks (Black, Ruff, Flake8)
+- ✅ **Testing**: Run 102 unit tests with 97% coverage
+- 🐳 **Docker Build**: Build and test Docker image
+- 🔗 **Docker Compose**: Verify multi-container setup
+- 🔄 **Integration**: End-to-end API tests
+- 📊 **Summary**: Overall pipeline status
+
+**Status Badge:** [![CI Pipeline](https://github.com/geraldolst/tst-logixpress/actions/workflows/ci.yml/badge.svg)](https://github.com/geraldolst/tst-logixpress/actions/workflows/ci.yml)
+
+#### 2. **Linting Workflow** (`.github/workflows/lint.yml`)
+Standalone code quality checks:
+- Black formatter validation
+- Ruff linter (modern Python linter)
+- Flake8 style guide enforcement
+- MyPy type checking (optional)
+
+### Running Locally
+
+```bash
+# Install linting tools
+pip install black ruff flake8 mypy
+
+# Format code
+black app/ tests/
+
+# Lint code
+ruff check app/ tests/
+
+# Style check
+flake8 app/ tests/ --max-line-length=120 --extend-ignore=E203,W503
+
+# Type check
+mypy app/ --ignore-missing-imports
+```
+
+### CI Configuration Files
+- `.github/workflows/ci.yml`: Main CI pipeline
+- `.github/workflows/lint.yml`: Code quality workflow
+- `pyproject.toml`: Tool configurations (Black, Ruff, pytest, coverage)
+- `pytest.ini`: Test runner configuration
+- `.gitignore`: Exclude build artifacts and cache
+
+### What CI Checks
+✅ Code formatting (Black)  
+✅ Linting (Ruff, Flake8)  
+✅ Type safety (MyPy)  
+✅ Unit tests (pytest)  
+✅ Code coverage (>95%)  
+✅ Docker build  
+✅ Docker Compose  
+✅ Integration tests  
+✅ Health checks  
+✅ API endpoints  
+
+All checks must pass before merging to main branch.
 
 ## Docker Usage
 ```bash

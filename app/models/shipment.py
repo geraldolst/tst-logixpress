@@ -9,18 +9,19 @@ from enum import Enum
 
 class ShipmentStatus(str, Enum):
     """Status pengiriman - Value Object (Enum)"""
+
     placed = "placed"
     in_transit = "in_transit"
     out_for_delivery = "out_for_delivery"
     delivered = "delivered"
     returned = "returned"
     cancelled = "cancelled"
-    
+
     @classmethod
     def get_valid_transitions(cls) -> dict[str, list[str]]:
         """
         Define valid status transitions
-        
+
         Returns:
             Dictionary mapping current status to list of valid next statuses
         """
@@ -32,14 +33,14 @@ class ShipmentStatus(str, Enum):
             cls.returned.value: [],  # Terminal state
             cls.cancelled.value: [],  # Terminal state
         }
-    
+
     def can_transition_to(self, new_status: "ShipmentStatus") -> bool:
         """
         Check if transition to new status is valid
-        
+
         Args:
             new_status: Target status
-            
+
         Returns:
             True if transition is valid, False otherwise
         """

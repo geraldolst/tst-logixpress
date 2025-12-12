@@ -4,9 +4,10 @@ Shipment Schemas
 Request and response models for shipment and tracking endpoints.
 """
 
-from pydantic import BaseModel, Field, EmailStr
-from typing import Optional, List
 from datetime import datetime
+from typing import List, Optional
+
+from pydantic import BaseModel, EmailStr, Field
 
 from app.models.shipment import ShipmentStatus
 
@@ -14,6 +15,7 @@ from app.models.shipment import ShipmentStatus
 # === VALUE OBJECTS (Pydantic Models) ===
 class Recipient(BaseModel):
     """Informasi penerima - Value Object"""
+
     name: str = Field(..., min_length=1, description="Nama penerima")
     email: EmailStr = Field(..., description="Email penerima")
     phone: str = Field(..., description="Nomor telepon penerima")
@@ -22,6 +24,7 @@ class Recipient(BaseModel):
 
 class Seller(BaseModel):
     """Informasi pengirim/seller - Value Object"""
+
     name: str = Field(..., description="Nama seller")
     email: EmailStr = Field(..., description="Email seller")
     phone: str = Field(..., description="Nomor telepon seller")
@@ -29,6 +32,7 @@ class Seller(BaseModel):
 
 class PackageDetails(BaseModel):
     """Detail paket - Value Object"""
+
     content: str = Field(..., min_length=1, description="Deskripsi isi paket")
     weight: float = Field(..., gt=0, le=25, description="Berat paket (kg), max 25kg")
     dimensions: Optional[str] = Field(None, description="Dimensi paket (PxLxT cm)")
@@ -38,6 +42,7 @@ class PackageDetails(BaseModel):
 # === ENTITIES ===
 class TrackingEvent(BaseModel):
     """Tracking Event - Internal Entity dalam Aggregate Shipment"""
+
     id: int
     location: str = Field(..., description="Lokasi kejadian")
     description: str = Field(..., description="Deskripsi kejadian")
@@ -47,6 +52,7 @@ class TrackingEvent(BaseModel):
 
 class TrackingEventCreate(BaseModel):
     """Schema untuk membuat tracking event baru"""
+
     location: str = Field(..., description="Lokasi kejadian")
     description: str = Field(..., description="Deskripsi kejadian")
     status: ShipmentStatus
@@ -55,6 +61,7 @@ class TrackingEventCreate(BaseModel):
 # === AGGREGATE ROOT: Shipment Schemas ===
 class ShipmentBase(BaseModel):
     """Base schema untuk Shipment"""
+
     package_details: PackageDetails
     recipient: Recipient
     destination_code: int = Field(..., description="Kode tujuan pengiriman")
@@ -62,11 +69,13 @@ class ShipmentBase(BaseModel):
 
 class ShipmentCreate(ShipmentBase):
     """Schema untuk membuat shipment baru"""
+
     seller: Seller
 
 
 class ShipmentRead(ShipmentBase):
     """Schema untuk membaca shipment - Aggregate Root"""
+
     id: int = Field(..., description="Tracking Number / Shipment ID")
     seller: Seller
     current_status: ShipmentStatus
@@ -77,6 +86,7 @@ class ShipmentRead(ShipmentBase):
 
 class ShipmentUpdate(BaseModel):
     """Schema untuk update shipment"""
+
     package_details: Optional[PackageDetails] = None
     recipient: Optional[Recipient] = None
     destination_code: Optional[int] = None
@@ -85,6 +95,7 @@ class ShipmentUpdate(BaseModel):
 
 class ShipmentSummary(BaseModel):
     """Schema ringkasan shipment untuk list view"""
+
     id: int
     content: str
     weight: float
@@ -96,5 +107,6 @@ class ShipmentSummary(BaseModel):
 
 class ShipmentCreationResponse(BaseModel):
     """Response when creating a new shipment"""
+
     id: int
     message: str
