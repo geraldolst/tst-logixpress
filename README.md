@@ -9,7 +9,7 @@
 
 Production-ready FastAPI microservice for last-mile delivery shipment lifecycle management.
 
-## 🚀 Cara Menjalankan Aplikasi
+##  Cara Menjalankan Aplikasi
 
 ### Opsi 1: Docker (Recommended)
 ```bash
@@ -21,10 +21,10 @@ docker compose up -d
 ```
 
 **Akses Aplikasi:**
-- 🌐 API: http://localhost:8000
-- 📚 Dokumentasi Scalar: http://localhost:8000/scalar
-- 📖 Swagger UI: http://localhost:8000/docs
-- ❤️ Health Check: http://localhost:8000/health
+-  API: http://localhost:8000
+-  Dokumentasi Scalar: http://localhost:8000/scalar
+- Swagger UI: http://localhost:8000/docs
+- Health Check: http://localhost:8000/health
 
 **Stop container:**
 ```bash
@@ -380,7 +380,7 @@ pytest tests/ -v
 pytest tests/ --cov=app --cov-report=term-missing --cov-report=html
 
 # Run specific test file
-pytest tests/test_auth.py -v
+pytest tests/[filename].py -v
 
 # Run specific test function
 pytest tests/test_auth.py::TestAuthEndpoints::test_login_success -v
@@ -406,21 +406,6 @@ xdg-open htmlcov/index.html  # Linux
 - **Minimum Coverage**: 95% (configured in pytest.ini)
 - **Current Coverage**: 97% (483 statements, 15 missed)
 
-### API Testing (Manual)
-```bash
-# Run with curl
-curl http://localhost:8000/health
-
-# Login and get token
-curl -X POST "http://localhost:8000/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin123"}'
-
-# Use token in subsequent requests
-curl -H "Authorization: Bearer <your-token>" \
-  http://localhost:8000/shipments
-```
-
 ## CI/CD Pipeline
 
 ### Automated Workflows
@@ -430,14 +415,12 @@ The project uses GitHub Actions for continuous integration and deployment:
 Triggered on push/PR to `main` and `develop` branches.
 
 **Jobs:**
-- 🧹 **Linting**: Code quality checks (Black, Ruff, Flake8)
-- ✅ **Testing**: Run 102 unit tests with 97% coverage
-- 🐳 **Docker Build**: Build and test Docker image
-- 🔗 **Docker Compose**: Verify multi-container setup
-- 🔄 **Integration**: End-to-end API tests
-- 📊 **Summary**: Overall pipeline status
-
-**Status Badge:** [![CI Pipeline](https://github.com/geraldolst/tst-logixpress/actions/workflows/ci.yml/badge.svg)](https://github.com/geraldolst/tst-logixpress/actions/workflows/ci.yml)
+-  **Linting**: Code quality checks (Black, Ruff, Flake8) -> Still fail
+-  **Testing**: Run 102 unit tests with 97% coverage
+-  **Docker Build**: Build and test Docker image
+-  **Docker Compose**: Verify multi-container setup
+-  **Integration**: End-to-end API tests
+-  **Summary**: Overall pipeline status
 
 #### 2. **Linting Workflow** (`.github/workflows/lint.yml`)
 Standalone code quality checks:
@@ -541,139 +524,8 @@ mypy app/                   # Type check
 - Scalable architecture
 - Following FastAPI best practices
 
-## Deployment
-
-### Vercel Deployment ▲
-
-**Prerequisites:**
-1. Create account at [vercel.com](https://vercel.com)
-2. Connect GitHub account
-
-**Deploy Steps:**
-
-**Via Vercel Dashboard:**
-```
-1. Go to https://vercel.com/new
-2. Click "Import Git Repository"
-3. Select: geraldolst/tst-logixpress
-4. Framework Preset: Other
-5. Click "Deploy"
-```
-
-**Configuration:**
-```
-Framework Preset: Other
-Root Directory: ./
-Build Command: (leave empty)
-Install Command: pip install -r requirements.txt
-Output Directory: (leave empty)
-```
-
-**Environment Variables:**
-Environment variables sudah dikonfigurasi di `vercel.json`:
-- ✅ SECRET_KEY
-- ✅ ALGORITHM
-- ✅ ACCESS_TOKEN_EXPIRE_MINUTES
-- ✅ ENVIRONMENT
-
-**Get Your URL:**
-```
-Vercel provides: https://tst-logixpress.vercel.app
-Or custom: https://tst-logixpress-[username].vercel.app
-```
-
-**Test Deployment:**
-```bash
-# Health check
-curl https://tst-logixpress.vercel.app/health
-
-# API Documentation
-https://tst-logixpress.vercel.app/docs
-
-# Test login
-curl -X POST https://tst-logixpress.vercel.app/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin123"}'
-```
-
-**Deployment Features:**
-- ✅ Auto-deploy on push to main branch
-- ✅ Preview deployments for PRs
-- ✅ Custom domains available
-- ✅ HTTPS by default
-- ✅ Edge network (CDN)
-- ✅ Zero configuration
-- ✅ In-memory database (perfect for demo)
-
-**Note:**
-- Uses in-memory database (data resets per deployment)
-- Perfect for demo, testing, and API documentation
-- For persistent data, consider adding external database
-
-**Monitoring:**
-```bash
-# Check health
-curl https://tst-logixpress.vercel.app/health
-
 # View API docs
-https://tst-logixpress.vercel.app/docs
-
-# View logs
-Vercel Dashboard → Deployments → Logs
-```
-
-### Railway Deployment 🚂
-
-**Prerequisites:**
-1. Create account at [railway.app](https://railway.app)
-2. Connect your GitHub account
-
-**Deploy Steps:**
-
-1. **Via Railway Dashboard:**
-   ```
-   1. Go to https://railway.app/new
-   2. Select "Deploy from GitHub repo"
-   3. Choose: geraldolst/tst-logixpress
-   4. Railway will auto-detect Dockerfile
-   5. Click "Deploy"
-   ```
-
-2. **Environment Variables (Important!):**
-   Add these in Railway Settings → Variables:
-   ```
-   SECRET_KEY=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
-   ALGORITHM=HS256
-   ACCESS_TOKEN_EXPIRE_MINUTES=30
-   ENVIRONMENT=production
-   ```
-
-3. **Get Your URL:**
-   ```
-   Railway will provide: https://your-app.railway.app
-   ```
-
-4. **Test Deployment:**
-   ```bash
-   curl https://your-app.railway.app/health
-   curl https://your-app.railway.app/docs
-   ```
-
-**Deployment Features:**
-- ✅ Auto-deploy on push to main branch
-- ✅ Docker container support
-- ✅ Custom domains available
-- ✅ HTTPS by default
-- ✅ Environment variables
-- ✅ Logs & metrics dashboard
-
-**Monitoring:**
-```bash
-# Check health
-curl https://your-app.railway.app/health
-
-# View API docs
-https://your-app.railway.app/docs
+https://https://tst-logixpress.vercel.app/docs
 ```
 
 ---
