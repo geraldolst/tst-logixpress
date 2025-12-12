@@ -511,6 +511,78 @@ mypy app/                   # Type check
 
 ## Deployment
 
+### Vercel Deployment ▲
+
+**Prerequisites:**
+1. Create account at [vercel.com](https://vercel.com)
+2. Install Vercel CLI (optional): `npm i -g vercel`
+
+**Deploy Steps:**
+
+**Option 1: Via Vercel Dashboard (Easiest)**
+```
+1. Go to https://vercel.com/new
+2. Import Git Repository
+3. Select: geraldolst/tst-logixpress
+4. Framework Preset: Other
+5. Click "Deploy"
+```
+
+**Option 2: Via CLI**
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Login
+vercel login
+
+# Deploy
+vercel --prod
+```
+
+**Environment Variables:**
+Vercel will auto-read from `vercel.json`, but you can override in dashboard:
+```
+Settings → Environment Variables:
+- SECRET_KEY
+- ALGORITHM
+- ACCESS_TOKEN_EXPIRE_MINUTES
+- ENVIRONMENT
+```
+
+**Get Your URL:**
+```
+Vercel provides: https://tst-logixpress.vercel.app
+```
+
+**Test Deployment:**
+```bash
+curl https://tst-logixpress.vercel.app/health
+curl https://tst-logixpress.vercel.app/docs
+```
+
+**⚠️ Vercel Limitations:**
+- Serverless functions (10s timeout on free tier)
+- Stateless (in-memory data resets per request)
+- Best for: API demos, testing, read-heavy operations
+
+**Deployment Features:**
+- ✅ Auto-deploy on push to main branch
+- ✅ Preview deployments for PRs
+- ✅ Custom domains available
+- ✅ HTTPS by default
+- ✅ Edge network (CDN)
+- ✅ Zero config for most cases
+
+**Monitoring:**
+```bash
+# Check health
+curl https://tst-logixpress.vercel.app/health
+
+# View API docs
+https://tst-logixpress.vercel.app/docs
+```
+
 ### Railway Deployment 🚂
 
 **Prerequisites:**
