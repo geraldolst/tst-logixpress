@@ -509,6 +509,62 @@ mypy app/                   # Type check
 - Scalable architecture
 - Following FastAPI best practices
 
+## Deployment
+
+### Railway Deployment 🚂
+
+**Prerequisites:**
+1. Create account at [railway.app](https://railway.app)
+2. Connect your GitHub account
+
+**Deploy Steps:**
+
+1. **Via Railway Dashboard:**
+   ```
+   1. Go to https://railway.app/new
+   2. Select "Deploy from GitHub repo"
+   3. Choose: geraldolst/tst-logixpress
+   4. Railway will auto-detect Dockerfile
+   5. Click "Deploy"
+   ```
+
+2. **Environment Variables (Important!):**
+   Add these in Railway Settings → Variables:
+   ```
+   SECRET_KEY=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
+   ALGORITHM=HS256
+   ACCESS_TOKEN_EXPIRE_MINUTES=30
+   ENVIRONMENT=production
+   ```
+
+3. **Get Your URL:**
+   ```
+   Railway will provide: https://your-app.railway.app
+   ```
+
+4. **Test Deployment:**
+   ```bash
+   curl https://your-app.railway.app/health
+   curl https://your-app.railway.app/docs
+   ```
+
+**Deployment Features:**
+- ✅ Auto-deploy on push to main branch
+- ✅ Docker container support
+- ✅ Custom domains available
+- ✅ HTTPS by default
+- ✅ Environment variables
+- ✅ Logs & metrics dashboard
+
+**Monitoring:**
+```bash
+# Check health
+curl https://your-app.railway.app/health
+
+# View API docs
+https://your-app.railway.app/docs
+```
+
 ---
 
 **Author**: Geraldo Linggom Samuel Tampubolon (18223136)  
