@@ -1,123 +1,145 @@
 # LOGIXPress API
-Tugas Besar II3160 Teknologi Sistem Terintegrasi
-Last-Mile Delivery System - **Shipment Lifecycle Management** (Core Domain)
+Production-ready FastAPI microservice for last-mile delivery shipment lifecycle management.
 
-## Deskripsi Proyek
+## Quick Start
 
-LOGIXPress adalah platform terintegrasi untuk mengelola siklus hidup pengiriman barang dari gudang ke pelanggan akhir (last-mile delivery). Implementasi ini menggunakan prinsip **Domain-Driven Design (DDD)** dengan fokus pada Bounded Context: **Shipment Lifecycle Management**.
-
-### Bounded Context: Shipment Lifecycle Management
-
-Mengelola seluruh siklus hidup pengiriman, mulai dari:
-- **C0101**: Shipment Order Creation
-- **C0102**: Shipment Tracking & Status Update  
-- **C0103**: Shipment Manifesting & Dispatch
-
-## Arsitektur DDD
-
-### Aggregate Root
-- **Shipment**: Objek utama yang menjamin konsistensi domain. Semua operasi harus melalui Aggregate Root ini.
-
-### Value Objects
-- **ShipmentStatus**: Enum status pengiriman (placed, in_transit, out_for_delivery, delivered, returned, cancelled)
-- **Recipient**: Informasi penerima (name, email, phone, address)
-- **Seller**: Informasi pengirim (name, email, phone)
-- **PackageDetails**: Detail paket (content, weight, dimensions, fragile)
-
-### Internal Entity
-- **TrackingEvent**: Riwayat kejadian pengiriman yang hanya dapat diakses melalui Aggregate Root
-
-## Security & Authentication
-
-API ini dilindungi dengan **JWT (JSON Web Token)** authentication untuk memastikan keamanan data dan akses terotorisasi.
-
-### Default Users
-
-| Role | Username | Password | Permissions |
-|------|----------|----------|-------------|
-| Admin | `admin` | `admin123` | Full access (CRUD semua fitur) |
-| Courier | `courier` | `courier123` | Update status, add tracking events |
-| Customer | `customer` | `customer123` | Create shipments, view data |
-
-### Authentication Flow
-
-1. **Login** menggunakan `/auth/login` dengan username dan password
-2. Dapatkan **JWT token** dari response
-3. Gunakan token di header `Authorization: Bearer <token>` untuk setiap request
-4. Token berlaku selama **30 menit**
-
-Lihat [API_TESTING.md](API_TESTING.md) untuk contoh penggunaan lengkap.
-
-## API Endpoints
-
-### Authentication
-- `POST /auth/login` - Login dan dapatkan JWT token
-- `GET /auth/me` - Get current user info
-
-### Shipment Management
-- `GET /` - Root endpoint dengan informasi API
-- `GET /shipments` - List semua shipment (dengan filtering)
-- `GET /shipment/{id}` - Detail shipment berdasarkan tracking number
-- `POST /shipment` - Membuat shipment baru
-- `PATCH /shipment/{id}` - Update shipment
-- `DELETE /shipment/{id}` - Hapus shipment
-
-### Tracking Events
-- `GET /shipment/{id}/tracking` - Riwayat tracking events
-- `POST /shipment/{id}/tracking` - Tambah tracking event baru
-
-### Statistics
-- `GET /stats` - Statistik shipment
-- `GET /health` - Health check
-
-### Documentation
-- `GET /docs` - OpenAPI/Swagger documentation
-- `GET /scalar` - Scalar API documentation
-
-## Setup & Installation
-
-### 1. Clone Repository
+### Docker usage
 ```bash
-git clone <repository-url>
-cd tst-logixpress
+docker compose up --build
 ```
+- App: http://localhost:8000
+- Docs: http://localhost:8000/docs
+- Scalar: http://localhost:8000/scalar
+- Health: http://localhost:8000/health
 
-### 2. Buat Virtual Environment
+### Local development
 ```bash
 python -m venv venv
 .\venv\Scripts\Activate.ps1  # Windows PowerShell
-```
-
-### 3. Install Dependencies
-```bash
 pip install -r requirements.txt
-```
-
-### 4. Jalankan Server
-
-Menggunakan run.py:
-```bash
 python run.py
 ```
-
-Atau langsung dengan uvicorn:
+Alternative:
 ```bash
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --port 8000
 ```
 
-Server akan berjalan di: `http://127.0.0.1:8000`
+## Project Structure
+```
+tst-logixpress/
+├── app/
+│   ├── main.py
+│   ├── config.py
+│   ├── api/
+│   │   ├── router.py
+│   │   ├── dependencies.py
+│   │   ├── routers/
+│   │   │   ├── auth.py
+│   │   │   ├── shipment.py
+│   │   │   ├── tracking.py
+│   │   │   └── stats.py
+│   │   └── schemas/
+│   │       ├── auth.py
+│   │       └── shipment.py
+│   ├── core/
+│   │   ├── exceptions.py
+│   │   └── security.py
+│   ├── models/
+│   │   └── shipment.py
+│   └── services/
+│       ├── auth.py
+│       └── shipment.py
+├── tests/
+├── data/
+├── Dockerfile
+├── docker-compose.yaml
+├── pyproject.toml
+├── requirements.txt
+└── README.md
+```
 
-## Dokumentasi API
+## API Overview
+All endpoints use JSON with JWT Bearer token authentication.
 
-Setelah server berjalan, akses dokumentasi di:
-- Swagger UI: `http://127.0.0.1:8000/docs`
-- Scalar UI: `http://127.0.0.1:8000/scalar`
+### Authentication
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/auth/register` | Create new user account | No |
+| POST | `/auth/login` | Login and get JWT token | No |
+| GET | `/auth/me` | Get current user info | Yes |
 
-## Contoh Request
+### Shipments
+| Method | Endpoint | Description | Role Required |
+|--------|----------|-------------|---------------|
+| GET | `/shipments` | List shipments (filterable) | Any authenticated |
+| GET | `/shipment/{id}` | Get shipment details | Any authenticated |
+| POST | `/shipment` | Create new shipment | admin, customer |
+| PATCH | `/shipment/{id}` | Update shipment | admin, courier |
+| DELETE | `/shipment/{id}` | Delete shipment | admin |
+
+### Tracking
+| Method | Endpoint | Description | Role Required |
+|--------|----------|-------------|---------------|
+| GET | `/shipment/{id}/tracking` | Get tracking history | Any authenticated |
+| POST | `/shipment/{id}/tracking` | Add tracking event | admin, courier |
+
+### Statistics
+| Method | Endpoint | Description | Role Required |
+|--------|----------|-------------|---------------|
+| GET | `/stats` | Get shipment statistics | admin |
+| GET | `/health` | Health check | None |
+
+## Shipment Status Workflow
+Shipment lifecycle:
+
+**PLACED** → **IN_TRANSIT** → **OUT_FOR_DELIVERY** → **DELIVERED**
+
+Alternative paths:
+- Any status → **CANCELLED**
+- IN_TRANSIT/OUT_FOR_DELIVERY → **RETURNED**
+
+### Status Transitions
+- `placed`: Initial status when shipment is created
+- `in_transit`: Package in transit to destination
+- `out_for_delivery`: Package out for delivery to recipient
+- `delivered`: Successfully delivered (terminal state)
+- `returned`: Package returned to sender (terminal state)
+- `cancelled`: Shipment cancelled (terminal state)
+
+**Rules:**
+- Only forward transitions allowed (except cancel/return)
+- Delivered shipments are immutable
+- Status changes automatically create tracking events
+
+## Default Users
+| Role | Username | Password | Permissions |
+|------|----------|----------|-------------|
+| Admin | `admin` | `admin123` | Full access (all operations) |
+| Courier | `courier` | `courier123` | Update status, add tracking |
+| Customer | `customer` | `customer123` | Create shipments, view own data |
+
+## Example Payloads
+
+### Register User
+```json
+{
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "securepass123",
+  "role": "customer"
+}
+```
+
+### Login
+```json
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
 
 ### Create Shipment
 ```json
-POST /shipment
 {
   "package_details": {
     "content": "Electronic Components",
@@ -128,26 +150,20 @@ POST /shipment
   "recipient": {
     "name": "John Doe",
     "email": "john@example.com",
-    "phone": "081234567890",
-    "address": "Jl. Contoh No. 123, Jakarta"
+    "phone": "+6281234567890",
+    "address": "Jl. Sudirman No. 123, Jakarta Pusat"
   },
   "seller": {
     "name": "Tech Store",
     "email": "sales@techstore.com",
-    "phone": "021-1234567"
+    "phone": "+6281234567891"
   },
   "destination_code": 11002
 }
 ```
 
-### Get Shipments (with filter)
-```
-GET /shipments?status=in_transit&limit=5
-```
-
 ### Update Shipment Status
 ```json
-PATCH /shipment/12701
 {
   "current_status": "in_transit"
 }
@@ -155,7 +171,6 @@ PATCH /shipment/12701
 
 ### Add Tracking Event
 ```json
-POST /shipment/12701/tracking
 {
   "location": "Distribution Center Jakarta",
   "description": "Package sorted and ready for dispatch",
@@ -163,54 +178,216 @@ POST /shipment/12701/tracking
 }
 ```
 
-## Teknologi yang Digunakan
+### Get Shipments (with filters)
+Query Parameters:
+- `status`: Filter by status (placed, in_transit, etc.)
+- `destination_code`: Filter by destination
+- `limit`: Max results (default: 10, max: 100)
 
-- **FastAPI**: Modern web framework untuk Python
-- **Pydantic**: Data validation menggunakan Python type hints
-- **JWT (JSON Web Token)**: Secure authentication & authorization
-- **Passlib + Bcrypt**: Password hashing
-- **Python-JOSE**: JWT token encoding/decoding
-- **Scalar FastAPI**: API documentation
-- **Uvicorn**: ASGI server
+Example: `GET /shipments?status=in_transit&limit=20`
 
-## Struktur Proyek
+## Example Responses
 
+### Single Shipment Response
+```json
+{
+  "id": 12701,
+  "package_details": {
+    "content": "Electronic Components",
+    "weight": 5.5,
+    "dimensions": "30x20x15",
+    "fragile": true
+  },
+  "recipient": {
+    "name": "John Doe",
+    "email": "john@example.com",
+    "phone": "+6281234567890",
+    "address": "Jl. Sudirman No. 123, Jakarta Pusat"
+  },
+  "seller": {
+    "name": "Tech Store",
+    "email": "sales@techstore.com",
+    "phone": "+6281234567891"
+  },
+  "destination_code": 11002,
+  "current_status": "placed",
+  "tracking_events": [
+    {
+      "id": 1,
+      "location": "Warehouse",
+      "description": "Shipment order created and received at warehouse",
+      "status": "placed",
+      "timestamp": "2024-12-01T09:00:00"
+    }
+  ],
+  "created_at": "2024-12-01T09:00:00",
+  "updated_at": "2024-12-01T09:00:00"
+}
 ```
-tst-logixpress/
-├── app/
-│   ├── __init__.py
-│   ├── main.py          # FastAPI app & endpoints
-│   ├── schemas.py       # Pydantic models (DDD)
-│   └── auth.py          # JWT authentication & authorization
-├── requirements.txt
-├── run.py
-├── .env.example
-├── README.md
-└── API_TESTING.md       # Authentication testing guide
+
+### Shipment List Response
+```json
+[
+  {
+    "id": 12701,
+    "content": "Electronic Components",
+    "weight": 5.5,
+    "current_status": "placed",
+    "destination_code": 11002,
+    "recipient_name": "John Doe",
+    "created_at": "2024-12-01T09:00:00"
+  },
+  {
+    "id": 12702,
+    "content": "Steel Rods",
+    "weight": 14.7,
+    "current_status": "in_transit",
+    "destination_code": 11003,
+    "recipient_name": "Jane Smith",
+    "created_at": "2024-12-01T08:00:00"
+  }
+]
 ```
 
-## Testing & Dokumentasi
+### Login Response
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+```
 
-### 1. Swagger UI (Interactive)
-Buka http://127.0.0.1:8000/docs untuk testing interaktif dengan Swagger UI.
+## Model Fields
 
-**Cara menggunakan authentication di Swagger:**
-1. Klik tombol **Authorize** 
-2. Login untuk mendapatkan token dari `/auth/login`
-3. Masukkan token di field authorization
-4. Test semua endpoints dengan akses terotorisasi
+### ShipmentCreate
+- `package_details`: PackageDetails object
+- `recipient`: Recipient object
+- `seller`: Seller object
+- `destination_code`: int
 
-### 2. Scalar Documentation
-Buka http://127.0.0.1:8000/scalar untuk dokumentasi yang lebih modern.
+### PackageDetails
+- `content`: str (required)
+- `weight`: float (required, max 25kg)
+- `dimensions`: str | None
+- `fragile`: bool (default: false)
 
-### 3. Manual Testing dengan cURL
-Lihat [API_TESTING.md](API_TESTING.md) untuk contoh lengkap testing dengan cURL dan berbagai role.
+### Recipient
+- `name`: str (required)
+- `email`: EmailStr (required)
+- `phone`: str (required)
+- `address`: str (required)
 
-## Author
+### Seller
+- `name`: str (required)
+- `email`: EmailStr (required)
+- `phone`: str (required)
 
-**Geraldo Linggom Samuel Tampubolon**  
-NIM: 18223136  
-Program Studi Sistem dan Teknologi Informasi  
-Institut Teknologi Bandung
+### ShipmentRead
+- `id`: int (tracking number)
+- `package_details`: PackageDetails
+- `recipient`: Recipient
+- `seller`: Seller
+- `destination_code`: int
+- `current_status`: ShipmentStatus
+- `tracking_events`: list[TrackingEvent]
+- `created_at`: datetime
+- `updated_at`: datetime
 
+### TrackingEvent
+- `id`: int
+- `location`: str
+- `description`: str
+- `status`: ShipmentStatus
+- `timestamp`: datetime
 
+## Role Permissions
+All write operations require authentication and proper role:
+
+- **Admin**: Full access to all operations
+- **Courier**: Can update shipment status and add tracking events
+- **Customer**: Can create shipments and view own data
+- **All authenticated**: Can view shipments and tracking
+
+## Error Handling
+- `400`: Bad request or validation error
+- `401`: Unauthorized (invalid/missing token)
+- `403`: Forbidden (insufficient permissions)
+- `404`: Not found
+- `422`: Validation error (Pydantic)
+- `500`: Internal server error
+
+## Testing
+```bash
+# Run with curl
+curl http://localhost:8000/health
+
+# Login and get token
+curl -X POST "http://localhost:8000/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+
+# Use token in subsequent requests
+curl -H "Authorization: Bearer <your-token>" \
+  http://localhost:8000/shipments
+```
+
+## Docker Usage
+```bash
+# Build and run
+docker compose up --build
+
+# Run in background
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop
+docker compose down
+
+# Rebuild
+docker compose build --no-cache
+```
+
+**Endpoints:**
+- App: http://localhost:8000
+- Docs: http://localhost:8000/docs
+- Scalar: http://localhost:8000/scalar
+- Health: http://localhost:8000/health
+
+## Development
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run development server with auto-reload
+python run.py
+# or
+uvicorn app.main:app --reload --port 8000
+
+# Check code (if dev tools installed)
+black app/ tests/           # Format
+ruff check app/ tests/      # Lint
+mypy app/                   # Type check
+```
+
+## Architecture
+**Domain-Driven Design (DDD)** with modular structure:
+
+- **API Layer** (`app/api/`): FastAPI routers, dependencies, schemas
+- **Core Layer** (`app/core/`): Security, exceptions, utilities
+- **Domain Layer** (`app/models/`): Domain models and business rules
+- **Service Layer** (`app/services/`): Business logic and operations
+- **Configuration** (`app/config.py`): Centralized settings
+
+**Benefits:**
+- Clean separation of concerns
+- Easy to test and maintain
+- Scalable architecture
+- Following FastAPI best practices
+
+---
+
+**Author**: Geraldo Linggom Samuel Tampubolon (18223136)  
+**Course**: TST (Teknologi Sistem Terintegrasi) - ITB  
+**Repository**: https://github.com/geraldolst/tst-logixpress
