@@ -1,3 +1,10 @@
+"""
+Run script for LOGIXPress API
+
+This script starts the FastAPI development server with auto-reload.
+For production, use: uvicorn app.main:app --host 0.0.0.0 --port 8000
+"""
+
 import uvicorn
 
 if __name__ == "__main__":
@@ -5,5 +12,7 @@ if __name__ == "__main__":
         "app.main:app",
         host="127.0.0.1",
         port=8000,
-        reload=True
+        reload=True,
+        log_level="info"
     )
+

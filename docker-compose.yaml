@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  # LOGIXPress API service
+  api:
+    build: .
+    container_name: logixpress-api
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7}
+      - ALGORITHM=${ALGORITHM:-HS256}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      - ENVIRONMENT=development
+    volumes:
+      - ./app:/app/app
+      - ./data:/app/data
+    restart: unless-stopped
+    networks:
+      - logixpress-network
+
+networks:
+  logixpress-network:
+    driver: bridge

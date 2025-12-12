@@ -1,18 +1,14 @@
-from enum import Enum
+"""
+Shipment Schemas
+
+Request and response models for shipment and tracking endpoints.
+"""
+
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
 from datetime import datetime
 
-
-# === VALUE OBJECTS (Enums) ===
-class ShipmentStatus(str, Enum):
-    """Status pengiriman - Value Object"""
-    placed = "placed"
-    in_transit = "in_transit"
-    out_for_delivery = "out_for_delivery"
-    delivered = "delivered"
-    returned = "returned"
-    cancelled = "cancelled"
+from app.models.shipment import ShipmentStatus
 
 
 # === VALUE OBJECTS (Pydantic Models) ===
@@ -56,7 +52,7 @@ class TrackingEventCreate(BaseModel):
     status: ShipmentStatus
 
 
-# === AGGREGATE ROOT: Shipment ===
+# === AGGREGATE ROOT: Shipment Schemas ===
 class ShipmentBase(BaseModel):
     """Base schema untuk Shipment"""
     package_details: PackageDetails
@@ -96,3 +92,9 @@ class ShipmentSummary(BaseModel):
     destination_code: int
     recipient_name: str
     created_at: datetime
+
+
+class ShipmentCreationResponse(BaseModel):
+    """Response when creating a new shipment"""
+    id: int
+    message: str
